@@ -25,7 +25,42 @@ def create_sentence_dict(sentence, input_string):
                 sentence[sentence_num] = ''
             else:
                 bracket_temp = False
+    sentence.pop(sentence_num)
+
+
+def create_word_dict(words, sentence):
+    for i in sentence:
+        words[i] = 0
+        words[i] = len([word for word in sentence[i].split() if word.isalpha()])
+    sort_dict(words)
+
+
+def sort_dict(dictionary):
+    temp = dict(sorted(dictionary.items(), key=lambda x: x[1]))
+    dictionary.clear()
+    for i in temp:
+        dictionary[i] = temp.setdefault(i)
+
+
+def get_middle_sum(dictionary):
+    temp_sum = 0
+    for i in dictionary:
+        temp_sum += dictionary.setdefault(i)
+    temp_sum /= len(dictionary)
+    return temp_sum
+
+
+def get_median(dictionary):
+    length = int(len(dictionary) / 2)
+    if len(dictionary) % 2 == 0:
+        return (dictionary[length] + dictionary[length + 1]) / 2
+    else:
+        return dictionary[length]
 
 
 create_sentence_dict(sentence_dict, input())
 print(sentence_dict)
+create_word_dict(word_dict, sentence_dict)
+print(word_dict)
+print("middle num of words: ", get_middle_sum(word_dict))
+print("median:", get_median(word_dict))
