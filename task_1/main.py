@@ -4,6 +4,10 @@ sentence_dict = dict()
 word_dict = dict()
 sorted_num_word = list()
 
+length_of_gram = 4
+top_grams_num = 10
+n_gram = dict()
+
 
 def create_sentence_dict(sentence, input_string):
     sentence_num = 0
@@ -58,9 +62,37 @@ def get_median(dictionary):
         return dictionary[length]
 
 
+def get_n_grams(gram_dict, dictionary, num, top):
+    for i in dictionary:
+        i_sentence = dictionary.setdefault(i)
+        for j in range(len(i_sentence) - num + 1):
+            sentence_string = i_sentence
+            gram_str = ''
+            for t in range(j, j + num):
+                if re.match(r"[a-zA-Z]", sentence_string[t]):
+                    gram_str += sentence_string[t]
+                else:
+                    break
+            print(gram_str)
+            if len(gram_str) == num:
+                gram_dict.setdefault(gram_str[0])
+                if gram_dict[gram_str[0]] is None:
+                    gram_dict[gram_str[0]] = dict()
+                    if gram_str not in gram_dict[gram_str[0]]:
+                        gram_dict[gram_str[0]][gram_str] = 0
+                    gram_dict[gram_str[0]][gram_str] += 1
+                else:
+                    if gram_str not in gram_dict[gram_str[0]]:
+                        gram_dict[gram_str[0]][gram_str] = 0
+                    gram_dict[gram_str[0]][gram_str] += 1
+
+
 create_sentence_dict(sentence_dict, input())
 print(sentence_dict)
 create_word_dict(word_dict, sentence_dict)
 print(word_dict)
 print("middle num of words: ", get_middle_sum(word_dict))
 print("median:", get_median(word_dict))
+
+get_n_grams(n_gram, sentence_dict, length_of_gram, top_grams_num)
+print(n_gram)
