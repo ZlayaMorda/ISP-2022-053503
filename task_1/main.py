@@ -66,25 +66,30 @@ def get_n_grams(gram_dict, dictionary, num, top):
     for i in dictionary:
         i_sentence = dictionary.setdefault(i)
         for j in range(len(i_sentence) - num + 1):
-            sentence_string = i_sentence
-            gram_str = ''
-            for t in range(j, j + num):
-                if re.match(r"[a-zA-Z]", sentence_string[t]):
-                    gram_str += sentence_string[t]
-                else:
-                    break
-            print(gram_str)
+            gram_str = create_gram(j, i_sentence, num)
+
             if len(gram_str) == num:
                 gram_dict.setdefault(gram_str[0])
                 if gram_dict[gram_str[0]] is None:
                     gram_dict[gram_str[0]] = dict()
-                    if gram_str not in gram_dict[gram_str[0]]:
-                        gram_dict[gram_str[0]][gram_str] = 0
-                    gram_dict[gram_str[0]][gram_str] += 1
+                    add_gram(gram_dict, gram_str)
                 else:
-                    if gram_str not in gram_dict[gram_str[0]]:
-                        gram_dict[gram_str[0]][gram_str] = 0
-                    gram_dict[gram_str[0]][gram_str] += 1
+                    add_gram(gram_dict, gram_str)
+
+
+def create_gram(j, i_sentence, num, gram_str=''):
+    for t in range(j, j + num):
+        if re.match(r"[a-zA-Z]", i_sentence[t]):
+            gram_str += i_sentence[t]
+        else:
+            break
+    return gram_str
+
+
+def add_gram(dictionary, gram):
+    if gram not in dictionary[gram[0]]:
+        dictionary[gram[0]][gram] = 0
+    dictionary[gram[0]][gram] += 1
 
 
 create_sentence_dict(sentence_dict, input())
