@@ -2,7 +2,6 @@ import re
 
 sentence_dict = dict()
 word_dict = dict()
-sorted_num_word = list()
 
 length_of_gram = 4
 top_grams_num = 10
@@ -39,8 +38,11 @@ def create_word_dict(words, sentence):
     sort_dict(words)
 
 
-def sort_dict(dictionary):
-    temp = dict(sorted(dictionary.items(), key=lambda x: x[1]))
+def sort_dict(dictionary, rev=True):
+    if rev == True:
+        temp = dict(sorted(dictionary.items(), key=lambda x: x[1]))
+    else:
+        temp = dict(sorted(dictionary.items(), key=lambda x: -x[1]))
     dictionary.clear()
     for i in temp:
         dictionary[i] = temp.setdefault(i)
@@ -62,7 +64,7 @@ def get_median(dictionary):
         return dictionary[length]
 
 
-def get_n_grams(gram_dict, dictionary, num, top):
+def get_n_grams(gram_dict, dictionary, num):
     for i in dictionary:
         i_sentence = dictionary.setdefault(i)
         for j in range(len(i_sentence) - num + 1):
@@ -75,6 +77,35 @@ def get_n_grams(gram_dict, dictionary, num, top):
                     add_gram(gram_dict, gram_str)
                 else:
                     add_gram(gram_dict, gram_str)
+    for i in gram_dict:
+        sort_dict(gram_dict.setdefault(i))
+
+
+def top_n_grams(gram_dict):
+    gram_top = dict()
+    num = 0
+    for i in gram_dict:
+        for j in gram_dict.setdefault(i):
+            gram_top[j] = gram_dict.setdefault(i).setdefault(j)
+            num += 1
+    sort_dict(gram_top, False)
+    return gram_top
+
+
+def print_top_grams(gram_top, top):
+    boolean = True
+    temp = 1
+    memory = 0
+    for i in gram_top:
+        if gram_top.setdefault(i) == memory:
+            boolean = True
+        else:
+            boolean = False
+        if temp > top and memory != gram_top.setdefault(i):
+            break
+        print(temp, ".", i, " - ", gram_top.setdefault(i))
+        memory = gram_top.setdefault(i)
+        temp += 1
 
 
 def create_gram(j, i_sentence, num, gram_str=''):
@@ -99,5 +130,7 @@ print(word_dict)
 print("middle num of words: ", get_middle_sum(word_dict))
 print("median:", get_median(word_dict))
 
-get_n_grams(n_gram, sentence_dict, length_of_gram, top_grams_num)
+get_n_grams(n_gram, sentence_dict, length_of_gram)
 print(n_gram)
+print(top_n_grams(n_gram))
+print_top_grams(top_n_grams(n_gram), top_grams_num)
