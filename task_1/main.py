@@ -1,7 +1,5 @@
 import re
 
-sentence_dict = dict()
-
 
 def sort_dict(dictionary, rev=True):
     if rev is True:
@@ -11,6 +9,33 @@ def sort_dict(dictionary, rev=True):
     dictionary.clear()
     for i in temp:
         dictionary[i] = temp.setdefault(i)
+
+
+class Sentence:
+    sentence_dict = dict()
+
+    def create_sentence_dict(self, input_string):
+        sentence_num = 0
+        Sentence.sentence_dict[0] = ''
+        bracket_temp = False
+        for i in input_string:
+            if re.match(r"[a-zA-Z]|\s", i) is not None:
+                Sentence.sentence_dict[sentence_num] += i
+            elif i == '.' or i == '!' or i == '?' or i == ';':
+                if Sentence.sentence_dict[sentence_num] and Sentence.sentence_dict[sentence_num].strip():
+                    sentence_num += 1
+                    Sentence.sentence_dict[sentence_num] = ''
+                    bracket_temp = False
+            elif i == '(':
+                bracket_temp = True
+            elif i == ')':
+                if not bracket_temp:
+                    sentence_num += 1
+                    Sentence.sentence_dict[sentence_num] = ''
+                else:
+                    bracket_temp = False
+        if not Sentence.sentence_dict[sentence_num]:
+            Sentence.sentence_dict.pop(sentence_num)
 
 
 class Word:
@@ -33,7 +58,7 @@ class Word:
         print("middle num of words: ", self.get_middle_sum())
 
     def get_median(self):
-        length = int(len(Word.word_dict) / 2)
+        length = int((len(Word.word_dict) - 1) / 2)
         if len(Word.word_dict) % 2 == 0:
             return (Word.word_dict[length] + Word.word_dict[length + 1]) / 2
         else:
@@ -103,57 +128,42 @@ class Grams:
 
     def input_length_top(self):
         print("Do you want input new length of gram and top number?(Yes/No)")
-        if input() == "yes" or "Yes":
+        answer = input()
+        if answer == "yes" or answer == "Yes":
             print("length:")
-            Grams.length_of_gram = self.is_int()
+            Grams.length_of_gram = self.is_int(4)
             print("top:")
-            Grams.top_grams_num = self.is_int()
+            Grams.top_grams_num = self.is_int(10)
 
-    def is_int(self):
+    def is_int(self, num):
         try:
             temp = int(input())
             return temp
         except ValueError:
             print("NO NUMBER! WHY?")
+            return num
 
 
+def main():
+    sentence_operations = Sentence()
+    sentence_operations.create_sentence_dict(input())
+    print(Sentence.sentence_dict)
+    if Sentence.sentence_dict:
+        words_operations = Word()
+        words_operations.create_word_dict(Sentence.sentence_dict)
+        print(words_operations.word_dict)
+        words_operations.print_middle_sum()
+        words_operations.print_median()
 
-def create_sentence_dict(sentence, input_string):
-    sentence_num = 0
-    sentence[0] = ''
-    bracket_temp = False
-    for i in input_string:
-        if re.match(r"[a-zA-Z]|\s", i) is not None:
-            sentence[sentence_num] += i
-        elif i == '.' or i == '!' or i == '?' or i == ';':
-            if sentence[sentence_num] and sentence[sentence_num].strip():
-                sentence_num += 1
-                sentence[sentence_num] = ''
-                bracket_temp = False
-        elif i == '(':
-            bracket_temp = True
-        elif i == ')':
-            if not bracket_temp:
-                sentence_num += 1
-                sentence[sentence_num] = ''
-            else:
-                bracket_temp = False
-    sentence.pop(sentence_num)
+        grams_operations = Grams()
+        grams_operations.input_length_top()
+        grams_operations.get_n_grams(Sentence.sentence_dict)
+        print(grams_operations.n_gram)
+        grams_operations.top_n_grams()
+        print(grams_operations.gram_top)
+        grams_operations.print_top_grams()
+    else:
+        print("empty input")
 
 
-create_sentence_dict(sentence_dict, input())
-print(sentence_dict)
-
-words_operations = Word()
-words_operations.create_word_dict(sentence_dict)
-print(words_operations.word_dict)
-words_operations.print_middle_sum()
-words_operations.print_median()
-
-grams_operations = Grams()
-grams_operations.input_length_top()
-grams_operations.get_n_grams(sentence_dict)
-print(grams_operations.n_gram)
-grams_operations.top_n_grams()
-print(grams_operations.gram_top)
-grams_operations.print_top_grams()
+main()
