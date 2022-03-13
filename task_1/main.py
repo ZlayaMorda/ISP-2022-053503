@@ -22,19 +22,20 @@ class Sentence:
             if re.match(r"[a-zA-Z]|\s", i) is not None:
                 Sentence.sentence_dict[sentence_num] += i
             elif i == '.' or i == '!' or i == '?' or i == ';':
-                if Sentence.sentence_dict[sentence_num] and Sentence.sentence_dict[sentence_num].strip():
+                if Sentence.sentence_dict[sentence_num] and not Sentence.sentence_dict[sentence_num].isspace():
                     sentence_num += 1
                     Sentence.sentence_dict[sentence_num] = ''
                     bracket_temp = False
             elif i == '(':
                 bracket_temp = True
             elif i == ')':
-                if not bracket_temp:
+                if not bracket_temp and Sentence.sentence_dict[sentence_num] and \
+                        Sentence.sentence_dict[sentence_num].strip():
                     sentence_num += 1
                     Sentence.sentence_dict[sentence_num] = ''
                 else:
                     bracket_temp = False
-        if not Sentence.sentence_dict[sentence_num]:
+        if Sentence.sentence_dict[sentence_num].isspace() or not Sentence.sentence_dict[sentence_num]:
             Sentence.sentence_dict.pop(sentence_num)
 
 
@@ -112,14 +113,9 @@ class Grams:
         sort_dict(Grams.gram_top, False)
 
     def print_top_grams(self):
-        boolean = True
         temp = 1
         memory = 0
         for i in Grams.gram_top:
-            if Grams.gram_top.setdefault(i) == memory:
-                boolean = True
-            else:
-                boolean = False
             if temp > Grams.top_grams_num and memory != Grams.gram_top.setdefault(i):
                 break
             print(temp, ".", i, " - ", Grams.gram_top.setdefault(i))
@@ -128,7 +124,11 @@ class Grams:
 
     def input_length_top(self):
         print("Do you want input new length of gram and top number?(Yes/No)")
-        answer = input()
+        try:
+            answer = input()
+        except EOFError:
+            print("No text found")
+            answer = "no"
         if answer == "yes" or answer == "Yes":
             print("length:")
             Grams.length_of_gram = self.is_int(4)
@@ -138,15 +138,24 @@ class Grams:
     def is_int(self, num):
         try:
             temp = int(input())
-            return temp
+            if temp > 0:
+                return temp
+            else:
+                return num
         except ValueError:
             print("NO NUMBER! WHY?")
+            return num
+        except EOFError:
+            print("No text found")
             return num
 
 
 def main():
     sentence_operations = Sentence()
-    sentence_operations.create_sentence_dict(input())
+    try:
+        sentence_operations.create_sentence_dict(input())
+    except EOFError:
+        print("No text found")
     print(Sentence.sentence_dict)
     if Sentence.sentence_dict:
         words_operations = Word()
