@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+
 class Serializer(ABC):
 
     @classmethod
@@ -12,10 +13,11 @@ class Serializer(ABC):
     def factory_deserialize(cls, obj):
         pass
 
-    @classmethod
-    def dumps(cls, obj) -> str:
-        return factory_serialize(obj)
 
-    @classmethod
-    def loads(cls, obj) -> any:
-        return factory_deserialize(obj)
+
+def dumps(serializer: Serializer, obj) -> str:
+    return serializer.factory_serialize(obj)
+
+
+def loads(serializer: Serializer, obj) -> any:
+    return serializer.factory_deserialize(obj)

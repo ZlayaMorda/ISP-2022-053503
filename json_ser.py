@@ -20,7 +20,6 @@ class JsonSerializer(Serializer):
         :return: tuple, which will be converted to json string
         """
         ser = cls.choose_type_method(obj)
-        ser = ser(obj)
         return tuple((temp, ser[temp]) for temp in ser)
 
     @classmethod
@@ -29,7 +28,7 @@ class JsonSerializer(Serializer):
         :param obj: object to serialize
         :return: method to convert different types
         """
-        if isinstance(obj, int, float, complex, bool, str, type(None)):
+        if isinstance(obj, (int, float, complex, bool, str, type(None))):
             return cls.serialize_standart(obj)
 
     @classmethod
@@ -41,7 +40,7 @@ class JsonSerializer(Serializer):
         :return: dict
         """
         ser_dick = dict()
-        ser_dick["type"] = re.search(r"\w+", str(type(obj)))
+        ser_dick["type"] = re.search(r"\'(\w+)\'", str(type(obj))).group(1)
         ser_dick["value"] = obj
         return ser_dick
 
