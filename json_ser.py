@@ -32,13 +32,15 @@ class JsonSerializer(Serializer):
             return cls.serialize_standart(obj)
         elif isinstance(obj, (list, tuple, bytes, bytearray, set, frozenset)):
             return cls.serialize_structures(obj)
+        elif isinstance(obj, dict):
+            return cls.serialize_dict(obj)
 
     @classmethod
     def serialize_standart(cls, obj):
         """
         serialize to dict
         :param obj: int, float, complex, bool, str, None
-        :return: dict with keys: ["type"] and ["value"]
+        :return: tuple dict with keys: ["type"] and ["value"]
         """
         ser_dick = dict()
         ser_dick["type"] = re.search(r"\'(\w+)\'", str(type(obj))).group(1)
@@ -50,12 +52,30 @@ class JsonSerializer(Serializer):
         """
         serialize to dict
         :param obj: list, tuple, bytes, bytearray, set, frozenset
-        :return: dict with keys: ["type"] and ["value"]
+        :return: tuple ict with keys: ["type"] and ["value"]
         """
         ser_dick = dict()
         ser_dick["type"] = re.search(r"\'(\w+)\'", str(type(obj))).group(1)
         ser_dick["value"] = tuple([cls.serialize(temp_obj) for temp_obj in obj])
         return ser_dick
+
+    @classmethod
+    def serialize_dict(cls, obj):
+        """
+        serialize do dict
+        :param obj: dict
+        :return: tuple dict with keys: ["type"] and ["value"]
+        """
+        ser_dic = dict()
+        ser_dic["type"] = "dict"
+        ser_dic["value"] = {}
+        for i in obj:
+            key = cls.serialize(i)
+            value = cls.serialize(obj[i])
+            ser_dic["value"][key] = value
+
+        ser_dic["value"] = tuple((key, ser_dic["value"][key]) for key in ser_dic["value"])
+        return ser_dic
 
     @classmethod
     def deserialize(cls, obj):
@@ -77,6 +97,8 @@ class JsonSerializer(Serializer):
             return cls.deserialize_standart(obj_type, obj_value)
         elif obj_type in ["list", "tuple", "bytes", "bytearray", "set", "frozenset"]:
             return cls.deserialize_structures(obj_type, obj_value)
+        elif obj_type == "dict":
+            return cls.deserialize_dict(obj_value)
 
     @classmethod
     def deserialize_standart(cls, obj_type, obj_value):
@@ -113,3 +135,10 @@ class JsonSerializer(Serializer):
             return set([cls.deserialize(temp) for temp in obj_value])
         elif obj_type == "frozenset":
             return frozenset([cls.deserialize(temp) for temp in obj_value])
+
+    @classmethod
+    def deserialize_dict(cls, obj_value):
+        dic = {}
+        for key in obj_value:
+            dic[cls.deserialize(key[0])] = cls.deserialize(key[1])
+        return dic
