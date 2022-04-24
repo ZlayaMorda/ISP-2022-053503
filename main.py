@@ -14,7 +14,6 @@ class Serializer(ABC):
         pass
 
 
-
 def dumps(serializer: Serializer, obj) -> str:
     return serializer.factory_serialize(obj)
 
