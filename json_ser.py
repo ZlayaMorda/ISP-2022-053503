@@ -32,6 +32,12 @@ class JsonSerializer(Serializer):
         'co_freevars',
         'co_cellvars'
     ]
+    NOT_CLASS_ATTRIBUTES = [
+        "__class__",
+        "__getattribute__",
+        "__new__",
+        "__setattr__",
+    ]
 
     @classmethod
     def factory_serialize(cls, obj):
@@ -64,6 +70,15 @@ class JsonSerializer(Serializer):
             return cls.serialize_dict(obj)
         elif inspect.isfunction(obj):
             return cls.serialize_function(obj)
+        elif inspect.isclass(obj):
+            return cls.serialize_class(obj)
+        elif inspect.ismethoddescriptor(obj) or inspect.ismodule(obj)\
+                or inspect.isbuiltin(obj):
+            return cls.serialize_instance(obj)
+        elif inspect.isgetsetdescriptor(obj):
+            return cls.serialize_instance(obj)
+        else:
+            return cls.serialize_object(obj)
 
     @classmethod
     def serialize_standart(cls, obj):
@@ -137,7 +152,66 @@ class JsonSerializer(Serializer):
         print(ser_dic["value"])
         ser_dic["value"] = tuple((k, ser_dic["value"][k]) for k in ser_dic["value"])
         return ser_dic
+    
+    @classmethod
+    def serialize_class(cls, obj):
+        ser = dict()
+        ser["type"] = "class"
+        ser["value"] = {}
+        ser["value"][cls.serialize("__name__")] =\
+            cls.serialize(obj.__name__)
+        members = []
+        for i in inspect.getmembers(obj):
+            if not (i[0] in cls.NOT_CLASS_ATTRIBUTES):
+                members.append(i)
 
+        for i in members:
+            key = cls.serialize(i[0])
+            val = cls.serialize(i[1])
+            ser["value"][key] = val
+        # cls.iter_member(members, ser)
+        ser["value"] = tuple((k, ser["value"][k]) for k in ser["value"])
+        
+        return ser
+    
+    @classmethod
+    def serialize_object(cls, obj):
+        class_obj = type(obj)
+        ser = dict()
+        ser["type"] = "object"
+        ser["value"] = {}
+        ser["value"][cls.serialize("__object_type__")] = \
+            cls.serialize(class_obj)
+        ser["value"][cls.serialize("__fields__")] = \
+            cls.serialize(obj.__dict__)
+        ser["value"] = tuple((k, ser["value"][k]) for k in ser["value"])
+
+        return ser
+    
+    @classmethod
+    def serialize_instance(cls, instance_obj):
+        ser = dict()
+        ser["type"] = re.search(r"\'(\w+)\'", str(type(instance_obj))).group(1)
+
+        ser["value"] = {}
+        members = inspect.getmembers(instance_obj)
+        members = [i for i in members if not callable(i[1])]
+        # cls.iter_member(members, ser)
+        for i in members:
+            key = cls.serialize(i[0])
+            val = cls.serialize(i[1])
+            ser["value"][key] = val
+        ser["value"] = tuple((k, ser["value"][k]) for k in ser["value"])
+
+        return ser
+    
+    # @classmethod
+    # def iter_member(cls, members, ser):
+    #     for i in members:
+    #         key = cls.serialize(i[0])
+    #         val = cls.serialize(i[1])
+    #         ser["value"][key] = val
+        
     @classmethod
     def deserialize(cls, obj):
         """

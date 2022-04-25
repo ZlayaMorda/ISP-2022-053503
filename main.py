@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 
-
 class Serializer(ABC):
 
     @classmethod
@@ -20,3 +19,8 @@ def dumps(serializer: Serializer, obj) -> str:
 
 def loads(serializer: Serializer, obj) -> any:
     return serializer.factory_deserialize(obj)
+
+
+def check(one, two):
+    return (one + two) ** 2
+
