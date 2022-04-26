@@ -3,6 +3,7 @@ from pydoc import locate
 from types import CodeType, FunctionType
 import re
 import inspect
+import ast
 
 
 class JsonSerializer(Serializer):
@@ -56,12 +57,9 @@ class JsonSerializer(Serializer):
             return ser
         else:
             ser = serialized.replace("{", "(").replace("}", ")") \
-                .replace("'type':", "'type',").replace("'value':", "'value',") \
-                .replace("'type',", "'type':", 1).replace("'value',", "'value':", 1) \
-                .replace("(", "{", 1)
-            ser = ser[:-1]
-            ser += "}"
-            return ser
+                .replace("'type':", "'type',").replace("'value':", "'value',")
+
+            return ast.literal_eval(ser)
 
     @classmethod
     def serialize(cls, obj):
@@ -188,7 +186,7 @@ class JsonSerializer(Serializer):
         ser = dict()
         ser["type"] = "class"
         ser["value"] = {}
-        ser["value"][cls.serialize("__name__")] =\
+        ser["value"][cls.serialize("__name__")] = \
             cls.serialize(obj.__name__)
         members = []
         for i in inspect.getmembers(obj):
@@ -239,7 +237,12 @@ class JsonSerializer(Serializer):
 
     @classmethod
     def serialize_module(cls, obj):
-        pass
+        ser = dict()
+        ser["type"] = "__module__name__"
+        string = str(obj)
+        ser["value"] = re.search(r"\'(\w+)\'", str(obj)).group(1)
+    
+        return ser
 
     @classmethod
     def iter_member(cls, members, ser):
@@ -247,7 +250,7 @@ class JsonSerializer(Serializer):
             key = cls.serialize(i[0])
             val = cls.serialize(i[1])
             ser["value"][key] = val
-        
+
     @classmethod
     def deserialize(cls, obj):
         """
@@ -276,6 +279,8 @@ class JsonSerializer(Serializer):
             return cls.deserialize_class(obj_value)
         elif obj_type == "object":
             return cls.deserialize_object(obj_value)
+        elif obj_type == "__module__name__":
+            return cls.deserialize_module(obj_value)
 
     @classmethod
     def deserialize_standart(cls, obj_type, obj_value):
@@ -324,7 +329,7 @@ class JsonSerializer(Serializer):
         for key in obj_value:
             dic[cls.deserialize(key[0])] = cls.deserialize(key[1])
         return dic
-    
+
     @classmethod
     def deserialize_function(cls, obj_value):
         """
@@ -382,3 +387,7 @@ class JsonSerializer(Serializer):
         name = some_dict["__name__"]
         del some_dict["__name__"]
         return type(name, (object,), some_dict)
+
+    @classmethod
+    def deserialize_module(cls, obj):
+        return __import__(obj)
