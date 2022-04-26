@@ -1,4 +1,5 @@
 from main import *
 from json_ser import JsonSerializer
 
-dumps(JsonSerializer(), check)
+print(JsonSerializer.deserialize(JsonSerializer.serialize(Person(1, 2))))
+# print(JsonSerializer.deserialize(JsonSerializer.serialize(Person())))

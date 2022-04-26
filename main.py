@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+
 class Serializer(ABC):
 
     @classmethod
@@ -23,4 +24,14 @@ def loads(serializer: Serializer, obj) -> any:
 
 def check(one, two):
     return (one + two) ** 2
+
+
+class Person:
+
+    def __init__(self, one, two):
+        self.one = one
+        self.two = two
+
+    def sum(self):
+        return self.one + self.two
 

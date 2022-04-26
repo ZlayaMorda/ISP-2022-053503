@@ -41,11 +41,27 @@ class JsonSerializer(Serializer):
 
     @classmethod
     def factory_serialize(cls, obj):
-        return cls.serialize(obj)
+        return cls.convert_str(cls.serialize(obj), True)
 
     @classmethod
     def factory_deserialize(cls, obj):
-        return cls.deserialize(obj)
+        return cls.deserialize(cls.convert_str(obj, False))
+
+    @classmethod
+    def convert_str(cls, serialized, convert):
+        if convert:
+            ser = str(serialized)
+            ser = ser.replace("(", "{").replace(")", "}") \
+                .replace("'type',", "'type':").replace("'value',", "'value':")
+            return ser
+        else:
+            ser = serialized.replace("{", "(").replace("}", ")") \
+                .replace("'type':", "'type',").replace("'value':", "'value',") \
+                .replace("'type',", "'type':", 1).replace("'value',", "'value':", 1) \
+                .replace("(", "{", 1)
+            ser = ser[:-1]
+            ser += "}"
+            return ser
 
     @classmethod
     def serialize(cls, obj):
@@ -73,7 +89,7 @@ class JsonSerializer(Serializer):
         elif inspect.isclass(obj):
             return cls.serialize_class(obj)
         elif inspect.iscode(obj):
-            return cls.serialize_code(obj)
+            return cls.serialize_instance(obj)
         elif inspect.ismethoddescriptor(obj) or inspect.isbuiltin(obj):
             return cls.serialize_instance(obj)
         elif inspect.isgetsetdescriptor(obj):
@@ -159,10 +175,9 @@ class JsonSerializer(Serializer):
                     elif name in glob and not inspect.ismodule(name) and name not in __builtins__:
                         glob_dict[name] = glob[name]
                 ser_dic["value"][key] = cls.serialize(glob_dict)
-        print(ser_dic["value"])
         ser_dic["value"] = tuple((k, ser_dic["value"][k]) for k in ser_dic["value"])
         return ser_dic
-    
+
     @classmethod
     def serialize_class(cls, obj):
         """
@@ -182,9 +197,9 @@ class JsonSerializer(Serializer):
 
         cls.iter_member(members, ser)
         ser["value"] = tuple((k, ser["value"][k]) for k in ser["value"])
-        
+
         return ser
-    
+
     @classmethod
     def serialize_object(cls, obj):
         """
@@ -203,7 +218,7 @@ class JsonSerializer(Serializer):
         ser["value"] = tuple((k, ser["value"][k]) for k in ser["value"])
 
         return ser
-    
+
     @classmethod
     def serialize_instance(cls, obj):
         """
@@ -225,7 +240,7 @@ class JsonSerializer(Serializer):
     @classmethod
     def serialize_module(cls, obj):
         pass
-    
+
     @classmethod
     def iter_member(cls, members, ser):
         for i in members:
@@ -257,6 +272,10 @@ class JsonSerializer(Serializer):
             return cls.deserialize_dict(obj_value)
         elif obj_type == "function":
             return cls.deserialize_function(obj_value)
+        elif obj_type == "class":
+            return cls.deserialize_class(obj_value)
+        elif obj_type == "object":
+            return cls.deserialize_object(obj_value)
 
     @classmethod
     def deserialize_standart(cls, obj_type, obj_value):
@@ -296,6 +315,11 @@ class JsonSerializer(Serializer):
 
     @classmethod
     def deserialize_dict(cls, obj_value):
+        """
+        deserialize dict
+        :param obj_value: tuple value
+        :return: dict
+        """
         dic = {}
         for key in obj_value:
             dic[cls.deserialize(key[0])] = cls.deserialize(key[1])
@@ -303,6 +327,11 @@ class JsonSerializer(Serializer):
     
     @classmethod
     def deserialize_function(cls, obj_value):
+        """
+        deserialize function
+        :param obj_value: tuple value
+        :return: function
+        """
         func = [0] * 4
         code = [0] * 16
         glob = {"__builtins__": __builtins__}
@@ -335,3 +364,21 @@ class JsonSerializer(Serializer):
             des.__getattribute__("__globals__")[des.__name__] = des
 
         return des
+
+    @classmethod
+    def deserialize_object(cls, obj):
+        obj_dict = cls.deserialize_dict(obj)
+        fields = []
+        for key in obj_dict["__fields__"]:
+            fields.append(obj_dict["__fields__"][key])
+        result = obj_dict["__object_type__"](*fields)
+        for key, value in obj_dict["__fields__"].items():
+            result.key = value
+        return result
+
+    @classmethod
+    def deserialize_class(cls, class_dict):
+        some_dict = cls.deserialize_dict(class_dict)
+        name = some_dict["__name__"]
+        del some_dict["__name__"]
+        return type(name, (object,), some_dict)
