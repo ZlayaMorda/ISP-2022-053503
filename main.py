@@ -22,16 +22,16 @@ def loads(serializer: Serializer, obj) -> any:
     return serializer.factory_deserialize(obj)
 
 
+def dump(serializer: Serializer, obj, path):
+    with open(path, "w") as file:
+        file.write(serializer.factory_serialize(obj))
+
+
+def load(serializer: Serializer, path):
+    with open(path, "r") as file:
+        return serializer.factory_deserialize(file.readline())
+
+
 def check(one, two):
     return (one + two) ** 2
-
-
-class Person:
-
-    def __init__(self, one, two):
-        self.one = one
-        self.two = two
-
-    def sum(self):
-        return self.one + self.two
 
