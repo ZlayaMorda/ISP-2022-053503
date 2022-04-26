@@ -1,4 +1,4 @@
-from main import Serializer
+from ser_package.factory_serializer import Serializer
 from pydoc import locate
 from types import CodeType, FunctionType
 import re
@@ -50,6 +50,9 @@ class JsonSerializer(Serializer):
 
     @classmethod
     def convert_str(cls, serialized, convert):
+        """
+        Convert string to json format
+        """
         if convert:
             ser = str(serialized)
             ser = ser.replace("(", "{").replace(")", "}") \
@@ -237,9 +240,13 @@ class JsonSerializer(Serializer):
 
     @classmethod
     def serialize_module(cls, obj):
+        """
+        serialize module
+        :param obj: module
+        :return: tuple dict with keys: ["type"] and ["value"]
+        """
         ser = dict()
         ser["type"] = "__module__name__"
-        string = str(obj)
         ser["value"] = re.search(r"\'(\w+)\'", str(obj)).group(1)
     
         return ser
@@ -372,6 +379,11 @@ class JsonSerializer(Serializer):
 
     @classmethod
     def deserialize_object(cls, obj):
+        """
+        deserialize object
+        :param obj: tuple value
+        :return: object
+        """
         obj_dict = cls.deserialize_dict(obj)
         fields = []
         for key in obj_dict["__fields__"]:
@@ -383,6 +395,11 @@ class JsonSerializer(Serializer):
 
     @classmethod
     def deserialize_class(cls, class_dict):
+        """
+        deserialize class
+        :param class_dict: tuple value
+        :return: class
+        """
         some_dict = cls.deserialize_dict(class_dict)
         name = some_dict["__name__"]
         del some_dict["__name__"]
@@ -390,4 +407,9 @@ class JsonSerializer(Serializer):
 
     @classmethod
     def deserialize_module(cls, obj):
+        """
+        deserialize module
+        :param obj: tuple value
+        :return: module
+        """
         return __import__(obj)
