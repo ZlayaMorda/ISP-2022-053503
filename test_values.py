@@ -56,14 +56,5 @@ class Puk:
         return self.one + self.two
 
 
-class PukDe:
-    one = 1
-    two = 2
-
-    @classmethod
-    def sum(cls):
-        return cls.one + cls.two
-
-
 test_convert = "{{'type': 'dict'}, {'value': {{{{'type': 'int'}, {'value': 123}}, {{'type': 'int'}, {'value': 23}}}, {{{'type': 'int'}, {'value': 234}}, {{'type': 'int'}, {'value': 23789}}}}}}"
 
