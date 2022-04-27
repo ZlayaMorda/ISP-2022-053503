@@ -34,6 +34,27 @@ class TestJsonSerialize(unittest.TestCase):
         self.check_equals(test_set)
         self.check_equals(test_frozen_set)
 
+    def test_dict(self):
+        self.check_equals(test_dict_1)
+        self.check_equals(test_dict_2)
+        self.check_equals(test_dict_3)
+
+    def test_function(self):
+        self.check_equals(test_fun_1())
+        self.check_equals(test_fun_2("ha", "dushnila"))
+        self.check_equals(test_fun_3(3, 4, 5, 6))
+        self.check_equals(big_boss_fun(12))
+
+    def test_class(self):
+        self.check_equals(Puk(1, 2).one)
+        self.check_equals(Puk(1, 2).two)
+        self.check_equals(Puk(1, 2).sum())
+        self.check_equals(PukDe.sum())
+
+    def test_convert(self):
+        self.assertEqual(test_convert, js.JsonSerializer.convert_str(js.JsonSerializer.serialize({123: 23, 234: 23789}), True))
+        self.assertEqual(js.JsonSerializer.serialize({123: 23, 234: 23789}), js.JsonSerializer.convert_str(test_convert, False))
+
 
 if __name__ == "__main__":
     unittest.main()
