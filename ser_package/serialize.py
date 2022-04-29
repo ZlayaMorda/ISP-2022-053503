@@ -1,5 +1,6 @@
 import re
 import inspect
+from ser_package.json_constants import *
 
 
 class JsonSerialize:

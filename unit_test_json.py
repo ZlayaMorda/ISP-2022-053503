@@ -32,9 +32,9 @@ class TestJsonSerialize(unittest.TestCase):
         self.assertFalse(fs.load(js.JsonSerializer(), self.file_name))
         self.assertEqual(test_int, js.JsonSerializer.
                          factory_deserialize(js.JsonSerializer.factory_serialize(test_int)))
-        self.assertEqual(test_int, js.JsonSerializer.
-                         deserialize_standart(js.JsonSerializer.serialize_standart(test_int)["type"],
-                                              js.JsonSerializer.serialize_standart(test_int)["value"]))
+        self.assertEqual(test_int, js.JsonDeserialize.
+                         deserialize_standart(js.JsonSerialize.serialize_standart(test_int)["type"],
+                                              js.JsonSerialize.serialize_standart(test_int)["value"]))
 
     def test_structures(self):
         self.check_equals(test_list)
@@ -66,8 +66,8 @@ class TestJsonSerialize(unittest.TestCase):
 
     def test_convert(self):
         self.assertEqual(test_convert,
-                         js.JsonSerializer.convert_str(js.JsonSerializer.serialize({123: 23, 234: 23789}), True))
-        self.assertEqual(js.JsonSerializer.serialize({123: 23, 234: 23789}),
+                         js.JsonSerializer.convert_str(js.JsonSerialize.serialize({123: 23, 234: 23789}), True))
+        self.assertEqual(js.JsonSerialize.serialize({123: 23, 234: 23789}),
                          js.JsonSerializer.convert_str(test_convert, False))
 
 
