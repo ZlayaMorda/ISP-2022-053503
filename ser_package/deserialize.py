@@ -116,8 +116,6 @@ class JsonDeserialize:
         func.insert(1, glob)
 
         des = FunctionType(*func)
-        if des.__name__ in des.__getattribute__("__globals__"):
-            des.__getattribute__("__globals__")[des.__name__] = des
 
         return des
 

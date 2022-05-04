@@ -32,8 +32,6 @@ class JsonSerialize:
             return cls.serialize_class(obj)
         elif inspect.ismodule(obj):
             return cls.serialize_module(obj)
-        elif isinstance(obj, type(type.__dict__)):
-            return cls.serialize_instance(obj)
         else:
             return cls.serialize_instance(obj)
 
@@ -139,8 +137,8 @@ class JsonSerialize:
     @classmethod
     def serialize_instance(cls, obj):
         """
-        serialize descriptors, mapping proxy, builtins
-        :param obj: descriptors, mapping proxy, builtins
+        serialize any other
+        :param obj: any
         :return: tuple dict with keys: ["type"] and ["value"]
         """
         if re.search(r"\'(\w+)\'", str(type(obj))) is None:
