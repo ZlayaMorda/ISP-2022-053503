@@ -54,6 +54,7 @@ def load(serializer: Serializer, path):
     :return: any
     """
     with open(path, "r") as file:
-        return serializer.factory_deserialize(file.readline())
-
-
+        string = ""
+        for i in file.readlines():
+            string += i
+        return serializer.factory_deserialize(string)

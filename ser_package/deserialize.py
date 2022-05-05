@@ -3,7 +3,7 @@ from pydoc import locate
 from types import CodeType, FunctionType
 
 
-class JsonDeserialize:
+class Deserialize:
     @classmethod
     def deserialize(cls, obj):
         """

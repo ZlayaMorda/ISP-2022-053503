@@ -3,7 +3,7 @@ import inspect
 from ser_package.json_constants import *
 
 
-class JsonSerialize:
+class Serialize:
 
     @classmethod
     def serialize(cls, obj):

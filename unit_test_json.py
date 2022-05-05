@@ -6,17 +6,26 @@ from test_values import *
 
 class TestJsonSerialize(unittest.TestCase):
     def setUp(self):
-        self.file_name = "ser.json"
+        self.file_name_json = "ser.json"
+        self.file_name_yaml = "ser.yaml"
 
     def check_equals(self, test):
         self.assertEqual(test, fs.loads(js.JsonSerializer(), fs.dumps(js.JsonSerializer(), test)))
-        self.assertIsNone(fs.dump(js.JsonSerializer(), test, self.file_name))
-        self.assertEqual(test, fs.load(js.JsonSerializer(), self.file_name))
+        self.assertIsNone(fs.dump(js.JsonSerializer(), test, self.file_name_json))
+        self.assertEqual(test, fs.load(js.JsonSerializer(), self.file_name_json))
+        
+        self.assertEqual(test, fs.loads(js.YamlSerializer(), fs.dumps(js.YamlSerializer(), test)))
+        self.assertIsNone(fs.dump(js.YamlSerializer(), test, self.file_name_yaml))
+        self.assertEqual(test, fs.load(js.YamlSerializer(), self.file_name_yaml))
 
     def check_fun_other(self, test, *args):
         self.assertEqual(test(*args), fs.loads(js.JsonSerializer(), fs.dumps(js.JsonSerializer(), test))(*args))
-        self.assertIsNone(fs.dump(js.JsonSerializer(), test, self.file_name))
-        self.assertEqual(test(*args), fs.load(js.JsonSerializer(), self.file_name)(*args))
+        self.assertIsNone(fs.dump(js.JsonSerializer(), test, self.file_name_json))
+        self.assertEqual(test(*args), fs.load(js.JsonSerializer(), self.file_name_json)(*args))
+
+        self.assertEqual(test(*args), fs.loads(js.YamlSerializer(), fs.dumps(js.YamlSerializer(), test))(*args))
+        self.assertIsNone(fs.dump(js.YamlSerializer(), test, self.file_name_yaml))
+        self.assertEqual(test(*args), fs.load(js.YamlSerializer(), self.file_name_yaml)(*args))
 
     def test_standart(self):
         self.check_equals(test_int)
@@ -25,16 +34,16 @@ class TestJsonSerialize(unittest.TestCase):
         self.check_equals(test_str)
         self.check_equals(test_none)
         self.assertTrue(fs.loads(js.JsonSerializer(), fs.dumps(js.JsonSerializer(), True)))
-        fs.dump(js.JsonSerializer(), True, self.file_name)
-        self.assertTrue(fs.load(js.JsonSerializer(), self.file_name))
+        fs.dump(js.JsonSerializer(), True, self.file_name_json)
+        self.assertTrue(fs.load(js.JsonSerializer(), self.file_name_json))
         self.assertFalse(fs.loads(js.JsonSerializer(), fs.dumps(js.JsonSerializer(), False)))
-        fs.dump(js.JsonSerializer(), False, self.file_name)
-        self.assertFalse(fs.load(js.JsonSerializer(), self.file_name))
+        fs.dump(js.JsonSerializer(), False, self.file_name_json)
+        self.assertFalse(fs.load(js.JsonSerializer(), self.file_name_json))
         self.assertEqual(test_int, js.JsonSerializer.
                          factory_deserialize(js.JsonSerializer.factory_serialize(test_int)))
-        self.assertEqual(test_int, js.JsonDeserialize.
-                         deserialize_standart(js.JsonSerialize.serialize_standart(test_int)["type"],
-                                              js.JsonSerialize.serialize_standart(test_int)["value"]))
+        self.assertEqual(test_int, js.Deserialize.
+                         deserialize_standart(js.Serialize.serialize_standart(test_int)["type"],
+                                              js.Serialize.serialize_standart(test_int)["value"]))
 
     def test_structures(self):
         self.check_equals(test_list)
@@ -60,14 +69,20 @@ class TestJsonSerialize(unittest.TestCase):
                                                  fs.dumps(js.JsonSerializer(), Puk))(1, 2).one)
         self.assertEqual(Puk(1, 2).two, fs.loads(js.JsonSerializer(),
                                                  fs.dumps(js.JsonSerializer(), Puk))(1, 2).two)
-
         self.assertEqual(Puk(1, 2).sum(), fs.loads(js.JsonSerializer(),
                                                    fs.dumps(js.JsonSerializer(), Puk))(1, 2).sum())
 
+        self.assertEqual(Puk(1, 2).one, fs.loads(js.YamlSerializer(),
+                                                 fs.dumps(js.YamlSerializer(), Puk))(1, 2).one)
+        self.assertEqual(Puk(1, 2).two, fs.loads(js.YamlSerializer(),
+                                                 fs.dumps(js.YamlSerializer(), Puk))(1, 2).two)
+        self.assertEqual(Puk(1, 2).sum(), fs.loads(js.YamlSerializer(),
+                                                   fs.dumps(js.YamlSerializer(), Puk))(1, 2).sum())
+
     def test_convert(self):
         self.assertEqual(test_convert,
-                         js.JsonSerializer.convert_str(js.JsonSerialize.serialize({123: 23, 234: 23789}), True))
-        self.assertEqual(js.JsonSerialize.serialize({123: 23, 234: 23789}),
+                         js.JsonSerializer.convert_str(js.Serialize.serialize({123: 23, 234: 23789}), True))
+        self.assertEqual(js.Serialize.serialize({123: 23, 234: 23789}),
                          js.JsonSerializer.convert_str(test_convert, False))
 
 
