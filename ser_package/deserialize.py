@@ -10,6 +10,7 @@ class Deserialize:
         :param obj: tuple
         :return: deserialized object
         """
+
         obj = dict((obj_type, obj_value) for obj_type, obj_value in obj)
         return cls.choose_deserialize_type_method(obj["type"], obj["value"])
 

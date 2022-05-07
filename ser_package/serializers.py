@@ -3,6 +3,7 @@ from ser_package.serialize import Serialize
 from ser_package.deserialize import Deserialize
 import ast
 import yaml
+import toml
 
 
 class JsonSerializer(Serializer):
@@ -40,3 +41,13 @@ class YamlSerializer(Serializer):
     @classmethod
     def factory_deserialize(cls, obj):
         return Deserialize.deserialize(yaml.load(obj))
+
+
+class TomlSerializer(Serializer):
+    @classmethod
+    def factory_serialize(cls, obj):
+        return toml.dumps({"data": str(Serialize.serialize(obj))})
+
+    @classmethod
+    def factory_deserialize(cls, obj):
+        return Deserialize.deserialize(ast.literal_eval(toml.loads(obj)['data']))

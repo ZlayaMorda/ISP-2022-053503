@@ -1,6 +1,6 @@
 import unittest
 import ser_package.factory_serializer as fs
-import ser_package.json_ser as js
+import ser_package.serializers as js
 from test_values import *
 
 
@@ -8,6 +8,7 @@ class TestJsonSerialize(unittest.TestCase):
     def setUp(self):
         self.file_name_json = "ser.json"
         self.file_name_yaml = "ser.yaml"
+        self.file_name_toml = "ser.toml"
 
     def check_equals(self, test):
         self.assertEqual(test, fs.loads(js.JsonSerializer(), fs.dumps(js.JsonSerializer(), test)))
@@ -18,6 +19,10 @@ class TestJsonSerialize(unittest.TestCase):
         self.assertIsNone(fs.dump(js.YamlSerializer(), test, self.file_name_yaml))
         self.assertEqual(test, fs.load(js.YamlSerializer(), self.file_name_yaml))
 
+        self.assertEqual(test, fs.loads(js.TomlSerializer(), fs.dumps(js.TomlSerializer(), test)))
+        self.assertIsNone(fs.dump(js.TomlSerializer(), test, self.file_name_toml))
+        self.assertEqual(test, fs.load(js.TomlSerializer(), self.file_name_toml))
+
     def check_fun_other(self, test, *args):
         self.assertEqual(test(*args), fs.loads(js.JsonSerializer(), fs.dumps(js.JsonSerializer(), test))(*args))
         self.assertIsNone(fs.dump(js.JsonSerializer(), test, self.file_name_json))
@@ -26,6 +31,10 @@ class TestJsonSerialize(unittest.TestCase):
         self.assertEqual(test(*args), fs.loads(js.YamlSerializer(), fs.dumps(js.YamlSerializer(), test))(*args))
         self.assertIsNone(fs.dump(js.YamlSerializer(), test, self.file_name_yaml))
         self.assertEqual(test(*args), fs.load(js.YamlSerializer(), self.file_name_yaml)(*args))
+
+        self.assertEqual(test(*args), fs.loads(js.TomlSerializer(), fs.dumps(js.TomlSerializer(), test))(*args))
+        self.assertIsNone(fs.dump(js.TomlSerializer(), test, self.file_name_toml))
+        self.assertEqual(test(*args), fs.load(js.TomlSerializer(), self.file_name_toml)(*args))
 
     def test_standart(self):
         self.check_equals(test_int)
