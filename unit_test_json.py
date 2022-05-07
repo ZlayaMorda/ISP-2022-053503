@@ -14,7 +14,7 @@ class TestJsonSerialize(unittest.TestCase):
         self.assertEqual(test, fs.loads(js.JsonSerializer(), fs.dumps(js.JsonSerializer(), test)))
         self.assertIsNone(fs.dump(js.JsonSerializer(), test, self.file_name_json))
         self.assertEqual(test, fs.load(js.JsonSerializer(), self.file_name_json))
-        
+
         self.assertEqual(test, fs.loads(js.YamlSerializer(), fs.dumps(js.YamlSerializer(), test)))
         self.assertIsNone(fs.dump(js.YamlSerializer(), test, self.file_name_yaml))
         self.assertEqual(test, fs.load(js.YamlSerializer(), self.file_name_yaml))
@@ -36,6 +36,32 @@ class TestJsonSerialize(unittest.TestCase):
         self.assertIsNone(fs.dump(js.TomlSerializer(), test, self.file_name_toml))
         self.assertEqual(test(*args), fs.load(js.TomlSerializer(), self.file_name_toml)(*args))
 
+    def test_convert_between_formats(self):
+        self.assertEqual(big_boss_fun(12),
+                         fs.loads(js.TomlSerializer(),
+                                  fs.dumps(js.JsonSerializer(), fs.dumps(js.JsonSerializer(), big_boss_fun),
+                                           "json", "toml"))(12))
+        self.assertEqual(big_boss_fun(12),
+                         fs.loads(js.YamlSerializer(),
+                                  fs.dumps(js.JsonSerializer(), fs.dumps(js.JsonSerializer(), big_boss_fun),
+                                           "json", "yaml"))(12))
+        self.assertEqual(big_boss_fun(12),
+                         fs.loads(js.JsonSerializer(),
+                                  fs.dumps(js.JsonSerializer(), fs.dumps(js.TomlSerializer(), big_boss_fun),
+                                           "toml", "json"))(12))
+        self.assertEqual(big_boss_fun(12),
+                         fs.loads(js.YamlSerializer(),
+                                  fs.dumps(js.JsonSerializer(), fs.dumps(js.TomlSerializer(), big_boss_fun),
+                                           "toml", "yaml"))(12))
+        self.assertEqual(big_boss_fun(12),
+                         fs.loads(js.TomlSerializer(),
+                                  fs.dumps(js.JsonSerializer(), fs.dumps(js.YamlSerializer(), big_boss_fun),
+                                           "yaml", "toml"))(12))
+        self.assertEqual(big_boss_fun(12),
+                         fs.loads(js.JsonSerializer(),
+                                  fs.dumps(js.JsonSerializer(), fs.dumps(js.YamlSerializer(), big_boss_fun),
+                                           "yaml", "json"))(12))
+
     def test_standart(self):
         self.check_equals(test_int)
         self.check_equals(test_float)
@@ -49,7 +75,7 @@ class TestJsonSerialize(unittest.TestCase):
         fs.dump(js.JsonSerializer(), False, self.file_name_json)
         self.assertFalse(fs.load(js.JsonSerializer(), self.file_name_json))
         self.assertEqual(test_int, js.JsonSerializer.
-                         factory_deserialize(js.JsonSerializer.factory_serialize(test_int)))
+                         factory_deserialize(js.JsonSerializer.factory_serialize(test_int, None, None)))
         self.assertEqual(test_int, js.Deserialize.
                          deserialize_standart(js.Serialize.serialize_standart(test_int)["type"],
                                               js.Serialize.serialize_standart(test_int)["value"]))
